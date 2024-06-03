@@ -82,9 +82,44 @@ class MatrixL:
     def transform(self, x, k):
         return x + (self.n - self.m + k) // 2  # Assuming centering transform
 
+
     def fill_matrix(self):
-        # Placeholder for the actual implementation
-        pass
+        for e in range(self.k + 1):
+            for d in range(-e + 1, self.n - self.m + 1):
+                print(f"\nlogical d: {d} physical d: {self.transform(d, self.k)} e: {e}")
+                if e == 0:
+                    upper_left = immediate_left = lower_left = -1
+                    print(f"Immediate left (initialized): {immediate_left}")
+                    print(f"Lower left (initialized): {lower_left}")
+                    print(f"Upper left (initialized): {upper_left}")
+                else:
+                    immediate_left = self.matrix[self.transform(d, self.k)][e-1]
+                    print(f"Immediate left: {immediate_left}")
+                    upper_left = self.matrix[self.transform(d-1, self.k)][e-1]
+                    print(f"Upper left: {upper_left}")
+                    if self.transform(d, self.k) < self.transform(self.n - self.m, self.k):
+                        lower_left = self.matrix[self.transform(d+1, self.k)][e-1]
+                        print(f"Lower left: {lower_left}")
+                    else:
+                        print(f"Cannot read from spot to bottom left at: {self.transform(d+1, self.k)} {e-1}")
+                        is_bottom_row = True
+
+                if is_bottom_row:
+                    row = max(upper_left + 1, immediate_left + 1)
+                    print(f"max: {row}")
+                    is_bottom_row = False
+                else:
+                    row = max(max(immediate_left + 1, lower_left), upper_left + 1)
+                    print(f"max: {row}")
+
+                row = min(row, self.m)
+                print(f"m: {self.m}")
+                print(f"row: {row}")
+                lcp = self.suffix_array.calculate_lcp(self.str, row + d, row + self.n + 1, self.n, self.m)
+                print(f"lcp: {lcp}")
+                self.matrix[self.transform(d, self.k)][e] = row + lcp
+                print(f"matrix element: {self.matrix[self.transform(d, self.k)][e]}")
+
 
     def print_matrix(self):
         for row in self.matrix:
